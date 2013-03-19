@@ -51,18 +51,27 @@ master.cf
 
 Every service of `master.cf` has an entry inside the hash `node['postfix']['master']`.
 
-The service name as key. The service should be `nil` to be ignored or a hash. The hash supports
+The service type and name is the key - separated by a colon. If service type is unix, the `unix:`
+prefix may be omitted. The service should be `nil` to be ignored or a hash. The hash supports
 the following attributes:
 
-* `command`: The program which should be started.
-* `args`: Additional arguments for the command call.
-* `private`:
-* `unpriv`:
-* `chroot`:
-* `wakeup`:
-* `maxproc`:
+* `command` (`service name`): The program which should be started.
+* `args` (`nil`): Additional arguments for the command call. Could be a string or a list of strings
+  (entries are separated with new lines in `master.cf` but no difference to separation entries with
+  a blank). Use `nil` to pass no additional arguments.
+* `private` (`y`): Whether or not access is restricted to the mail system.
+* `unpriv` (`y`): Whether the service runs with root privileges or as the owner of the Postfix
+  system.
+* `chroot` (`y`): Whether or not the service runs chrooted to the mail queue directory.
+* `wakeup` (`0`): Automatically wake up the named service after the specified number of seconds.
+* `maxproc` (`$default_process_limit`): The maximum number of processes that may execute this
+  service simultaneously.
 
-**Planned**: LWRP to define services inside other cookbooks.
+Use `nil` or do not set option to use the default value. Use `false` and `true` for `y` and `n`.
+
+See the `master(5)` man page for a complete documentation.
+
+**Planned**: Definition to define services inside other cookbooks.
 
 
 lookup-tables

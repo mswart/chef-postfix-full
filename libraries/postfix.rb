@@ -30,4 +30,60 @@ class Chef::Node
     lines << ''
     lines.join "\n"
   end
+
+  def generate_postfix_master_cf
+    return nil if self['postfix']['master'].nil?
+    lines = '''# MANAGED BY CHEF - DO NOT EDIT
+#
+# Postfix master process configuration file.  For details on the format
+# of the file, see the master(5) manual page (command: "man 5 master").
+#
+# Do not forget to execute "postfix reload" after editing this file.
+#
+# ==========================================================================
+# service type  private unpriv  chroot  wakeup  maxproc command + args
+#               (yes)   (yes)   (yes)   (never) (0)
+# ==========================================================================
+'''.split('\n')
+    def map_value(value, size)
+      { false => 'n', true => 'y', nil => '-' }.fetch(value, value).to_s.ljust(size)
+    end
+    self['postfix']['master'].to_hash.sort.each do |name, service|
+      next if service.nil?
+      if /^(inet|unix|fifo|pass):(.+)$/ =~ name
+        type = $1
+        name = $2
+      else
+        type = 'unix'
+      end
+      service[:command] ||= name
+      # 1. service name
+      line = name.ljust(9)
+      # 2. type
+      line += ' ' + type.to_s.ljust(5)
+      # 3. private
+      line += ' ' + map_value(service[:private], 7)
+      # 4. unpriv
+      line += ' ' + map_value(service[:unpriv], 7)
+      # 5. chroot
+      line += ' ' + map_value(service[:chroot], 7)
+      # 6. wakeup
+      line += ' ' + map_value(service[:wakeup], 7)
+      # 7. maxproc
+      line += ' ' + map_value(service[:maxproc], 7)
+      # 8. command + args
+      line += ' ' + service[:command]
+      lines << line
+      # 9. args
+      unless service[:args].nil?
+        lines += if service[:args].kind_of? String
+          [ service[:args] ]
+        else
+          service[:args]
+        end.map { |l| '  ' + l }
+      end
+    end
+    lines << ''
+    lines.join "\n"
+  end
 end

@@ -32,6 +32,14 @@ file ::File.join(node['postfix']['base_dir'], 'main.cf') do
   notifies :reload, "service[postfix]"
 end
 
+file ::File.join(node['postfix']['base_dir'], 'master.cf') do
+  content node.generate_postfix_master_cf
+  user 'root'
+  group 0
+  mode 00644
+  notifies :restart, "service[postfix]"
+end
+
 service 'postfix' do
   action :start
 end
