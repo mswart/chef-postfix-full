@@ -25,7 +25,7 @@ service 'postfix' do
 end
 
 file ::File.join(node['postfix']['base_dir'], 'main.cf') do
-  content = node.generate_postfix_main_cf
+  content node.generate_postfix_main_cf
   user 'root'
   group 0
   mode 00644

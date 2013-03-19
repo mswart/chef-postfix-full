@@ -19,11 +19,13 @@
 
 class Chef::Node
   def generate_postfix_main_cf
-    return nil if self['postfix'].nil?
+    return nil if self['postfix']['main'].nil?
     lines = []
-    self['postfix'].to_hash.sort.each do |option, value|
+    self['postfix']['main'].to_hash.sort.each do |option, value|
       next if value.nil?
-      lines << "#{option} = #{value.to_s}"
+      value = 'yes' if value == true
+      value = 'no' if value == false
+      lines << "#{option} = #{value}"
     end
     lines << ''
     lines.join "\n"
