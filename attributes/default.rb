@@ -21,6 +21,10 @@
 default['postfix']['base_dir'] = '/etc/postfix'
 
 default['postfix']['main'] = {}
+default['postfix']['main']['myhostname'] = node['fqdn']
+default['postfix']['main']['mydomain'] = node['domain']
+default['postfix']['main']['myorigin'] = '/etc/mailname'
+
 
 # default['postfix']['master'] for master.cf
 default['postfix']['master'] = {}

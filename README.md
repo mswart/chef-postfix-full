@@ -48,6 +48,8 @@ Use option name as key inside this hash. For the value multiple types are suppor
 * `''`: Speical case of the String type. Designed to clear a default value for postfix.
 * `nil`: ignore this option and exclude it from `main.cf`. So the postfix default is used.
 
+See [same main.cf example configurations](#basic-changes-and-hash-tables)
+
 
 master.cf
 ---------
@@ -72,7 +74,8 @@ the following attributes:
 
 Use `nil` or do not set option to use the default value. Use `false` and `true` for `y` and `n`.
 
-See the `master(5)` man page for a complete documentation.
+See the `master(5)` man page for a complete documentation and
+[an example definition on other services](#additional-services).
 
 **Planned**: Definition to define services inside other cookbooks.
 
@@ -115,6 +118,8 @@ The following configuration entries are specified:
 
 The content entry format depends on the table type.
 
+[An advances table example with a external service and table inhiretance](#advanced-table-usage)
+
 
 ### TableType: hash
 
@@ -128,6 +133,120 @@ Set the configuration values like `main.cf` options.
 
 The cookbooks does not ensures that this table type is supported by postfix. On debian based
 distributions additional packages must be installed.
+
+
+Examples
+--------
+
+All attributes are written as 1.9+ ruby hashes - minimal overhead.
+
+### Basic changes and hash tables:
+
+```ruby
+{
+  postfix: {
+    main: {
+      # the it explict because it is a important option
+      mydomain: 'cookbooks.example',
+
+      # we needs to support bigger attachments:
+      message_size_limit: 25600000,
+
+      # some sasl configuration for smtp client:
+      smtp_sasl_auth_enable: true,
+      smtp_sender_dependent_authentication: true,
+
+      smtp_sasl_password_maps: 'hash:/etc/postfix/tables/auths', # not managed by chef
+      smtp_sasl_security_options: 'noanonymous',
+      smtp_sasl_mechanism_filter: '!gssapi, !ntlm, plain, login',
+    },
+    tables: {
+      relayhosts: {
+        _type: 'hash',
+        _set: 'sender_dependent_relayhost_maps',
+        'chef@cookbooks.test' => '[192.0.2.32]',
+        '@cookbooks.test' => 'mail37.mails.example',
+      }
+    }
+  }
+}
+```
+
+### Additional services
+
+```ruby
+{
+  postfix: {
+    master: {
+      'inet:submission' => {
+        private: false,
+        chroot: false,
+        command: 'smtpd',
+        args: [
+          '-o smtpd_sender_login_maps=ldap:/etc/postfix/tables/submission-sender-login-map',
+          '-o smtpd_recipient_restrictions=reject_sender_login_mismatch,permit_sasl_authenticated,permit_tls_clientcerts,reject',
+        ],
+      },
+      mailman: {
+        unprivate: false,
+        chroot: false,
+        command: 'pipe',
+        args: [
+          'flags=FR',
+          'user=list',
+          'argv=/usr/lib/mailman/bin/postfix-to-mailman.py ${nexthop} ${user}',
+        ],
+      },
+    }
+  }
+}
+```
+
+### Advanced table usage
+
+```ruby
+{
+  postfix: {
+    tables: {
+      ldap: {
+        _abstract: true,
+        _type: 'ldap',
+        _proxy: true,
+        version: 3,
+        server_host: 'ldap.cookbooks.example',
+        bind: true,
+        bind_dn: 'cn=mail,ou=system,dc=cookbooks,dc=example',
+        _bind_pw_from_file: '/etc/postfix/ldap.password',
+        search_base: 'ou=mail,dc=cookbooks,dc=example',
+        start_tls: true,
+        tls_ca_cert_path: '/etc/ssl/certs',
+        tls_cert: '/etc/postfix/ssl/mail.cookbooks.example_chain.pem',
+        tls_key: '/etc/postfix/ssl/mail.cookbooks.example_key.pem',
+        tls_require_cert: true,
+      },
+      aliases: {
+        _parent: 'ldap',
+        _add: 'virtual_alias_maps',
+        query_filter: '(|(mailAliases=%s)(&(mailUser=%u)(mailDomain=%d)))',
+        result_attribute: 'mailDestination',
+        domain: 'cookbooks.example, chef.example',
+      },
+      sender_login_map: {
+        _parent: 'ldap',
+        _set: 'smtpd_sender_login_maps',
+        search_base: 'ou=users,dc=cookbooks,dc=example',
+        query_filter: '(|(mail=%s)(mailAliases=%s)(mailAccounts=%s)(mailAccount=%s)(mailAdditionalSender=%s))',
+        result_attribute: 'mailAccount',
+      },
+      transport: {
+        _type: 'hash',
+        _set: 'transport_maps',
+        'lists.cookbooks,example' => 'mailman:',
+      },
+    }
+  },
+}
+```
 
 
 License and Author
