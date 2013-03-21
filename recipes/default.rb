@@ -40,6 +40,18 @@ file ::File.join(node['postfix']['base_dir'], 'master.cf') do
   notifies :restart, "service[postfix]"
 end
 
+
+directory ::File.join(node['postfix']['base_dir'], 'tables') do
+  owner "root"
+  group "root"
+  mode 00755
+  action :create
+end
+
+node.get_postfix_tables.each do |name, table|
+  table.generate_resources self
+end
+
 service 'postfix' do
   action :start
 end

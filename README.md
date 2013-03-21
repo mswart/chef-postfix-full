@@ -74,14 +74,56 @@ See the `master(5)` man page for a complete documentation.
 **Planned**: Definition to define services inside other cookbooks.
 
 
-lookup-tables
--------------
+Look up tables
+--------------
 
 The cookbook can manage lookup-tables for you. It can create the configuration files for ldap or
-mysql. Basic tables like hash tables can be filled with content from attributes or data_bags.
+mysql. Basic tables like hash tables can be filled with content from attributes (data_bag support
+planed).
 
-**ToDo**: Define attribute interface for lookup tables. Should support inheritance of lookup
-tables. Primary used to create a lot of similar `ldap` or `mysql` tables.
+The tables are defined inside the hash `node['postfix']['tables']`.
+
+Every table has a name (internal usage and per defined as file name) as key and a hash as value with
+its configuration.
+
+The hash has two types of entries:
+
+- **configuration entry**: key-value pair to define options of this table for the cookbook. Every
+  key must start with exactly one `_`.
+- **content entry**: Key->value pair to define the content of the table. If the key starts with `_`,
+  the key must be prefixed with additional `_`.
+
+The following configuration entries are specified:
+
+* `_type`: definies the type of the table, see the following subsection for the list and describtion
+  of the supported tables. The option is required, but can be inhired from parent tables
+  (see _parent).
+* `_parent` (`nil`): name of table from which options should be inherit (configuration and content
+  entries). There is no nesting limit but also no loop protection.
+* `_abstract` (`nil`): set this to `true` to exclude this resource from chef management. This table
+  can therefore only used as parent table. The `_abstract` option is removed after the inhiretance.
+  You have to reset it in the subtable if you what the subtable to be abstract, too.
+* `_file` (`$basedir/tables/$table_name`): File name to put the table content or the table
+  configuration (depends on table type)
+* `_user` (`root`): User name or id for the files of the table
+* `_group` (`0`): Group name or id for the files of the table
+* `_mode` (`00644`): Access mode for the files of the table
+
+The content entry format depends on the table type.
+
+
+### TableType: hash
+
+Use lookup key as content entry key and result as value. The cookbook call postmap automatically.
+
+
+### Config tables: ldap memcache mysql pgsql sqlite tcp
+
+These tables have all a `main.cf` like configuration file. This file can be created by chef.
+Set the configuration values like `main.cf` options.
+
+The cookbooks does not ensures that this table type is supported by postfix. On debian based
+distributions additional packages must be installed.
 
 
 License and Author

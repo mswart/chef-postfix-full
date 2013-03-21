@@ -86,4 +86,37 @@ class Chef::Node
     lines << ''
     lines.join "\n"
   end
+
+  def get_postfix_tables
+    table_data = self['postfix']['tables'].to_hash
+    tables = {}
+    table_data.each do |name, options|
+      # resolving parent references
+      while not options['_parent'].nil?
+        parent_options = table_data[options['_parent']]
+        unless parent_options
+          msg = "postfix-table: could not find parent table #{options['_parent']}"
+          Chef::Log.fatal msg
+          raise msg
+        end
+        parent_options = parent_options.reject { |k, v| k == '_abstract'}
+        options = Chef::Mixin::DeepMerge.merge(parent_options, options.reject { |k, v| k == '_parent'})
+      end
+      # spliting data and params
+      data = {}
+      params = {}
+      options.each do |option, value|
+        if option[0] != 95 # normal content key
+          data[option] = value
+        else
+          ( option[1] != 95 ? params : data)[option[1..-1]] = value
+        end
+      end
+      # skip if table is abstract
+      next if params['abstract'] == true
+      # create table object from params
+      tables[name] = Postfix::Table.new_as_table_type name, params, data
+    end
+    tables
+  end
 end
