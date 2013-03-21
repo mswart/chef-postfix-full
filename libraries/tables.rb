@@ -29,9 +29,7 @@ module Postfix
 
     def self.new_as_table_type(node, name, params)
       unless @@types.include? params['_type']
-        msg = "postfix table: unknown table type: #{data['_type']}"
-        Chef::Log.fatal msg
-        raise msg
+        Postfix.chef_error "postfix table: unknown table type: #{params['_type']}"
       end
       @@types[params['_type']].new node, name, params
     end
@@ -40,13 +38,13 @@ module Postfix
       data = {}
       params = {}
       options.each do |option, value|
-        if option[0] != 95 # normal content key
+        if option.chars.first != '_' # normal content key
           data[option] = value
         else
-          ( option[1] != 95 ? params : data)[option[1..-1]] = value
+          ( option[0..1] != '__' ? params : data)[option[1..-1]] = value
         end
       end
-      [ data, params ]
+      [ params, data ]
     end
 
 

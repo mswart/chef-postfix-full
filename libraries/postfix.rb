@@ -29,6 +29,11 @@ module Postfix
     lines << ''
     lines.join "\n"
   end
+
+  def self.chef_error msg
+    Chef::Log.fatal msg
+    raise msg
+  end
 end
 
 
@@ -52,9 +57,6 @@ class Chef::Node
 #               (yes)   (yes)   (yes)   (never) (0)
 # ==========================================================================
 '''.split('\n')
-    def map_value(value, size)
-      { false => 'n', true => 'y', nil => '-' }.fetch(value, value).to_s.ljust(size)
-    end
     self['postfix']['master'].to_hash.sort.each do |name, service|
       next if service.nil?
       if /^(inet|unix|fifo|pass):(.+)$/ =~ name
@@ -64,54 +66,53 @@ class Chef::Node
         type = 'unix'
       end
       service[:command] ||= name
-      # 1. service name
-      line = name.ljust(9)
-      # 2. type
-      line += ' ' + type.to_s.ljust(5)
-      # 3. private
-      line += ' ' + map_value(service[:private], 7)
-      # 4. unpriv
-      line += ' ' + map_value(service[:unpriv], 7)
-      # 5. chroot
-      line += ' ' + map_value(service[:chroot], 7)
-      # 6. wakeup
-      line += ' ' + map_value(service[:wakeup], 7)
-      # 7. maxproc
-      line += ' ' + map_value(service[:maxproc], 7)
-      # 8. command + args
+      # service name + type
+      line = name.ljust(9) + ' ' + type.to_s.ljust(5)
+      # options
+      [ :private, :unpriv, :chroot, :wakeup, :maxproc ].each do |option|
+        line += ' ' + map_value(service[option], 7)
+      end
+      # command
       line += ' ' + service[:command]
       lines << line
       # 9. args
-      unless service[:args].nil?
-        lines += if service[:args].kind_of? String
-          [ service[:args] ]
-        else
-          service[:args]
-        end.map { |l| '  ' + l }
-      end
+      lines += convert_command_args(service[:args])
     end
     lines << ''
     lines.join "\n"
   end
 
   def get_postfix_tables
-    table_data = self['postfix']['tables'].to_hash
-    table_data.map do |name, options|
+    tables = self['postfix']['tables'].to_hash
+    tables.inject([]) do |result, (name, options)|
       # resolving parent references
-      while not options['_parent'].nil?
-        parent_options = table_data[options['_parent']]
-        unless parent_options
-          msg = "postfix-table: could not find parent table #{options['_parent']}"
-          Chef::Log.fatal msg
-          raise msg
+      while options['_parent']
+        unless tables.include? options['_parent']
+          Postfix.chef_error "postfix-table: could not find parent table #{options['_parent']}"
         end
-        parent_options = parent_options.reject { |k, v| k == '_abstract'}
-        options = Chef::Mixin::DeepMerge.merge(parent_options, options.reject { |k, v| k == '_parent'})
+        options = Chef::Mixin::DeepMerge.merge(
+          tables[options['_parent']].reject { |k, v| k == '_abstract'},
+          options.reject { |k, v| k == '_parent'}
+        )
       end
       # skip if table is abstract
-      next if options['_abstract'] == true
+      next result if options['_abstract']
       # create table object from params
-      Postfix::Table.new_as_table_type self, name, options
-    end.reject { |t| t.nil? }
+      result << Postfix::Table.new_as_table_type(self, name, options)
+    end
+  end
+
+  private
+  def map_value(value, size)
+    { false => 'n', true => 'y', nil => '-' }.fetch(value, value).to_s.ljust(size)
+  end
+
+  def convert_command_args(args)
+    return [] if args.nil?
+    if args.kind_of? String
+      [ args ]
+    else
+      args
+    end.map { |line| '  ' + line }
   end
 end
