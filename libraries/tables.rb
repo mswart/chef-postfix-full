@@ -44,6 +44,11 @@ module Postfix
           ( option[0..1] != '__' ? params : data)[option[1..-1]] = value
         end
       end
+      params.each do |param, option|
+        if param =~ /(.+)_from_file/
+          data[$1] = File.open(option).read.rstrip
+        end
+      end
       [ params, data ]
     end
 

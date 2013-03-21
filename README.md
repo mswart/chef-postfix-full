@@ -10,7 +10,7 @@ the feature is implemented, some points could be missing.**
 Description
 -----------
 
-Another postfix cookbook for chef. Against others (e.g. the 
+Another postfix cookbook for chef. Against others (e.g. the
 [opscode/postfix](https://github.com/opscode-cookbooks/postfix)) it tries to abstract all
 configuration possibilities of postfix to chef with attributes and data bags.
 
@@ -111,6 +111,7 @@ The following configuration entries are specified:
 * `_user` (`root`): User name or id for the files of the table
 * `_group` (`0`): Group name or id for the files of the table
 * `_mode` (`00644`): Access mode for the files of the table
+* `_`$key`_from_file`: The value for content entry $key is set to the content of the given file name.
 
 The content entry format depends on the table type.
 
