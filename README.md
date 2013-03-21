@@ -1,6 +1,8 @@
 chef-postfix-full
 =================
 
+[![Code Climate](https://codeclimate.com/github/mswart/chef-postfix-full.png)](https://codeclimate.com/github/mswart/chef-postfix-full)
+
 **This cookbook is currently under development and designing! Because the README is written before
 the feature is implemented, some points could be missing.**
 
@@ -8,8 +10,9 @@ the feature is implemented, some points could be missing.**
 Description
 -----------
 
-Another postfix cookbook for chef. Against others (e.g. the [opscode/postfix](https://github.com/opscode-cookbooks/postfix)) it tries to abstract
-all configuration possibilities of postfix to chef with attributes and data bags.
+Another postfix cookbook for chef. Against others (e.g. the 
+[opscode/postfix](https://github.com/opscode-cookbooks/postfix)) it tries to abstract all
+configuration possibilities of postfix to chef with attributes and data bags.
 
 The goal is that the cookbook does not limit your usage of postfix in any ways.
 

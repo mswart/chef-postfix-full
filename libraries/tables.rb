@@ -27,25 +27,52 @@ module Postfix
       end
     end
 
-    def self.new_as_table_type(name, params, data)
-      unless @@types.include? params['type']
-        msg = "postfix table: unknown table type: #{params['type']}"
+    def self.new_as_table_type(node, name, params)
+      unless @@types.include? params['_type']
+        msg = "postfix table: unknown table type: #{data['_type']}"
         Chef::Log.fatal msg
         raise msg
       end
-      @@types[params['type']].new name, params, data
+      @@types[params['_type']].new node, name, params
     end
 
-    attr_reader :name, :params, :data
+    def self.split_params_and_data(options)
+      data = {}
+      params = {}
+      options.each do |option, value|
+        if option[0] != 95 # normal content key
+          data[option] = value
+        else
+          ( option[1] != 95 ? params : data)[option[1..-1]] = value
+        end
+      end
+      [ data, params ]
+    end
 
-    def initialize(name, params, data)
+
+    attr_reader :node, :name, :data
+
+    def initialize(node, name, params)
+      @node = node
       @name = name
-      @params = params
-      @data = data
+      @params, @data = self.class.split_params_and_data(params)
     end
 
     def generate_resources()
       raise 'generate_resources not implemented'
+    end
+
+    def default_params()
+      {
+        'user' => 'root',
+        'group' => 0,
+        'mode' => 00644,
+        'file' => ::File.join(node['postfix']['base_dir'], 'tables', name)
+      }
+    end
+
+    def params()
+      default_params.merge @params
     end
   end
 
@@ -53,27 +80,9 @@ module Postfix
   class ConfigTable < Table
     register self, %w(ldap memcache mysql pgsql sqlite tcp)
 
-    def generate_config_content()
-      lines = []
-      data.sort.each do |option, value|
-        next if value.nil?
-        value = 'yes' if value == true
-        value = 'no' if value == false
-        lines << "#{option} = #{value}"
-      end
-      lines << ''
-      lines.join "\n"
-    end
-
     def generate_resources(recipe)
-      default_params = {
-        'user' => 'root',
-        'group' => 0,
-        'mode' => 00644,
-        'file' => ::File.join(recipe.node['postfix']['base_dir'], 'tables', name)
-      }
-      params = default_params.merge @params
-      content = generate_config_content
+      params = self.params
+      content = Postfix.generate_config_file data
 
       recipe.file params['file'] do
         content content
@@ -99,15 +108,8 @@ module Postfix
     end
 
     def generate_resources(recipe)
-      default_params = {
-        'user' => 'root',
-        'group' => 0,
-        'mode' => 00644,
-        'file' => ::File.join(recipe.node['postfix']['base_dir'], 'tables', name)
-      }
-      params = default_params.merge @params
+      params = self.params
       content = generate_config_content
-
       execute_name = "postmap-#{name}"
 
       recipe.execute execute_name do

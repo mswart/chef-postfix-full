@@ -17,11 +17,10 @@
 # limitations under the License.
 #
 
-class Chef::Node
-  def generate_postfix_main_cf
-    return nil if self['postfix']['main'].nil?
+module Postfix
+  def self.generate_config_file(data)
     lines = []
-    self['postfix']['main'].to_hash.sort.each do |option, value|
+    data.to_hash.sort.each do |option, value|
       next if value.nil?
       value = 'yes' if value == true
       value = 'no' if value == false
@@ -29,6 +28,14 @@ class Chef::Node
     end
     lines << ''
     lines.join "\n"
+  end
+end
+
+
+class Chef::Node
+  def generate_postfix_main_cf
+    return nil if self['postfix']['main'].nil?
+    Postfix.generate_config_file self['postfix']['main']
   end
 
   def generate_postfix_master_cf
@@ -89,8 +96,7 @@ class Chef::Node
 
   def get_postfix_tables
     table_data = self['postfix']['tables'].to_hash
-    tables = {}
-    table_data.each do |name, options|
+    table_data.map do |name, options|
       # resolving parent references
       while not options['_parent'].nil?
         parent_options = table_data[options['_parent']]
@@ -102,21 +108,10 @@ class Chef::Node
         parent_options = parent_options.reject { |k, v| k == '_abstract'}
         options = Chef::Mixin::DeepMerge.merge(parent_options, options.reject { |k, v| k == '_parent'})
       end
-      # spliting data and params
-      data = {}
-      params = {}
-      options.each do |option, value|
-        if option[0] != 95 # normal content key
-          data[option] = value
-        else
-          ( option[1] != 95 ? params : data)[option[1..-1]] = value
-        end
-      end
       # skip if table is abstract
-      next if params['abstract'] == true
+      next if options['_abstract'] == true
       # create table object from params
-      tables[name] = Postfix::Table.new_as_table_type name, params, data
-    end
-    tables
+      Postfix::Table.new_as_table_type self, name, options
+    end.reject { |t| t.nil? }
   end
 end

@@ -48,7 +48,7 @@ directory ::File.join(node['postfix']['base_dir'], 'tables') do
   action :create
 end
 
-node.get_postfix_tables.each do |name, table|
+node.get_postfix_tables.each do |table|
   table.generate_resources self
 end
 
