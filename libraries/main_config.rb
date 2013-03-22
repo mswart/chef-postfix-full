@@ -23,9 +23,11 @@ module Postfix
 
     def initialize(options)
       @options = options
+      @options_to_merge = {}
     end
 
     def content
+      merge_options
       lines = []
       options.sort.each do |option, value|
         next if value.nil?
@@ -35,6 +37,50 @@ module Postfix
       end
       lines << ''
       lines.join "\n"
+    end
+
+    def set_option(name_or_names, value)
+      unless name_or_names.respond_to? :each
+        name_or_names = [ name_or_names ]
+      end
+      name_or_names.each do |name|
+        options[name] = value
+      end
+    end
+
+    def add_option(options, value)
+      if options.is_a? String
+        options = { options => nil }
+      end
+      options.each do |option, preference|
+        @options_to_merge[option] ||= []
+        @options_to_merge[option] << [preference, value]
+      end
+    end
+
+    def register_tables(tables)
+      tables.each do |table|
+        params = table.params
+        if params['set']
+          set_option params['set'], table.identifier
+        end
+        if params['add']
+          add_option params['add'], table.identifier
+        end
+      end
+    end
+
+
+    private
+
+    def merge_options
+      @options_to_merge.each do |option, values|
+        if options[option]
+          values << [ 0, options[option] ]
+        end
+        options[option] = values.sort.map { |p, v| v }.join(" ")
+      end
+      @options_to_merge = {}
     end
   end
 end

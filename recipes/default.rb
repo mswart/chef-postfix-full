@@ -28,6 +28,7 @@ postfix_tables = Postfix::TableFetcher.new(node).fetch
 
 # generate main.cf
 main_cf = Postfix::MainConfig.new(node['postfix']['main'].to_hash)
+main_cf.register_tables postfix_tables
 
 file ::File.join(node['postfix']['base_dir'], 'main.cf') do
   content main_cf.content

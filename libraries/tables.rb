@@ -80,6 +80,11 @@ module Postfix
     def params
       default_params.merge @params
     end
+
+    def identifier
+      prefix = params['proxy'] ? 'proxy:' : ''
+      "#{prefix}#{params['type']}:#{params['file']}"
+    end
   end
 
 

@@ -91,6 +91,44 @@ The following configuration entries are specified:
 * `_mode` (`00644`): Access mode for the files of the table
 * `_`$key`_from_file`: The value for content entry $key is set to the content of the given file name.
 
+The following options provides shortcuts to use the table for a postfix option. The table is registered with it identifier (type + path to file):
+
+* `_set` (`nil`): name or list of names of postfix options to use only this table. The value for this option in `node['postfix']['main']` will **be overwritten**. Two table must not have the same postfix option name (only one option will be used).
+* `_add` (`nil`): Shortcut to add this table to previously defined values (main value or other table). The value for this option in `node['postfix']['main']` will **not be overwritten**.
+
+  Use a hash as option. Every key should be a name of a `main.cf` configuration option. The value should be a priority. The lowest value will be the first one in the line. The main.cf value has the priority 0. The string as value is a shortcut for `{ $value => nil }` - append option to previous values.
+
+  An example:
+
+  ```ruby
+    {
+      postfix: {
+        main: {
+          virtual_alias_maps: 'hash:top_secret'
+        },
+        tables: {
+          fast_table: {
+            _type: 'regexp',
+            _add: { alias_maps: nil, virtual_alias_maps: -1 }
+          },
+          low_priority_table: {
+            _type: 'ldap',
+            _add: { virtual_alias_maps: 3 }
+          }
+        }
+      }
+    }
+  ```
+
+  will creates the following main.cf options:
+
+
+  ```
+  alias_maps = regexp:/etc/postfix/tables/fast_table
+  virtual_alias_maps = regexp:/etc/postfix/tables/fast_table hash:top_secret ldap:/etc/postfix/tables/low_priority_table
+  ```
+* `_proxy` (false): Set this to true to query the table thought the postfix proxy server. See `postmap(8)` for more information.
+
 The content entry format depends on the table type.
 
 [An advances table example with a external service and table inheritancee](#advanced-table-usage)
