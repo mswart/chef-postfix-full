@@ -29,7 +29,9 @@ module Postfix
 
     def self.new_as_table_type(node, name, params)
       unless @@types.include? params['_type']
-        Postfix.chef_error "postfix table: unknown table type: #{params['_type']}"
+        msg = "postfix table: unknown table type: #{params['_type']}"
+        Chef::Log.fatal msg
+        raise msg
       end
       @@types[params['_type']].new node, name, params
     end
@@ -53,6 +55,7 @@ module Postfix
     end
 
 
+
     attr_reader :node, :name, :data
 
     def initialize(node, name, params)
@@ -61,11 +64,11 @@ module Postfix
       @params, @data = self.class.split_params_and_data(params)
     end
 
-    def generate_resources()
+    def generate_resources
       raise 'generate_resources not implemented'
     end
 
-    def default_params()
+    def default_params
       {
         'user' => 'root',
         'group' => 0,
@@ -74,7 +77,7 @@ module Postfix
       }
     end
 
-    def params()
+    def params
       default_params.merge @params
     end
   end
@@ -85,10 +88,10 @@ module Postfix
 
     def generate_resources(recipe)
       params = self.params
-      content = Postfix.generate_config_file data
+      config = Postfix::MainConfig.new data
 
       recipe.file params['file'] do
-        content content
+        content config.content
         user params['user']
         group params['group']
         mode params['mode']

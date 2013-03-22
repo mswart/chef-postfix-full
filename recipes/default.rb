@@ -24,23 +24,29 @@ service 'postfix' do
   action :enable
 end
 
+postfix_tables = Postfix::TableFetcher.new(node).fetch
+
+# generate main.cf
+main_cf = Postfix::MainConfig.new(node['postfix']['main'].to_hash)
+
 file ::File.join(node['postfix']['base_dir'], 'main.cf') do
-  content node.generate_postfix_main_cf
+  content main_cf.content
   user 'root'
   group 0
   mode 00644
   notifies :reload, "service[postfix]"
 end
 
+# generate master.cf
 file ::File.join(node['postfix']['base_dir'], 'master.cf') do
-  content node.generate_postfix_master_cf
+  content Postfix::MasterConfig.new(node['postfix']['master']).content
   user 'root'
   group 0
   mode 00644
   notifies :restart, "service[postfix]"
 end
 
-
+# generate postfix tables
 directory ::File.join(node['postfix']['base_dir'], 'tables') do
   owner "root"
   group "root"
@@ -48,10 +54,11 @@ directory ::File.join(node['postfix']['base_dir'], 'tables') do
   action :create
 end
 
-node.get_postfix_tables.each do |table|
+postfix_tables.each do |table|
   table.generate_resources self
 end
 
+# start service
 service 'postfix' do
   action :start
 end
