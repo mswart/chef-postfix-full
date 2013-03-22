@@ -139,4 +139,29 @@ module Postfix
       end
     end
   end
+
+  class OrderTable < Table
+    register self, %w(cidr regexp pcre)
+
+    def generate_config_content()
+      unless params['format'] == 'pairs_sorted_by_key'
+        raise "unknown table content format #{params['format']}"
+      end
+      lines = data.sort.map { |option, value| "#{option} #{value}" }
+      lines << ''
+      lines.join "\n"
+    end
+
+    def generate_resources(recipe)
+      params = self.params
+      content = generate_config_content
+
+      recipe.file params['file'] do
+        content content
+        user params['user']
+        group params['group']
+        mode params['mode']
+      end
+    end
+  end
 end

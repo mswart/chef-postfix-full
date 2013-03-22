@@ -146,6 +146,17 @@ These tables have all a `main.cf` like configuration file. This file can be crea
 The cookbooks does not ensures that this table type is supported by postfix. On debian based distributions additional packages must be installed.
 
 
+### Tables with ordering: cidr regexp pcre
+
+The behavior of the cidr, regexp and pcre table depends on the ordering of the content.
+
+The `_format` configuration options defines how the order is created. The following options are supported:
+
+* `pair_sorted_by_key`: The key->value pairs are sorted by key. Key and value are separated by a blank.
+
+Other formats are planed.
+
+
 Examples
 --------
 
