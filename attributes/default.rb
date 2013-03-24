@@ -45,7 +45,7 @@ default['postfix']['master']['smtp'       ] = {}
 default['postfix']['master']['relay'      ][:command] = 'smtp'
 default['postfix']['master']['showq'      ][:private] = false
 default['postfix']['master']['error'      ] = {}
-default['postfix']['master']['retry'      ] = {}
+default['postfix']['master']['retry'      ][:command] = 'error'
 default['postfix']['master']['discard'    ] = {}
 default['postfix']['master']['local'      ] = { :unpriv => false, :chroot => false }
 default['postfix']['master']['virtual'    ] = { :unpriv => false, :chroot => false }
