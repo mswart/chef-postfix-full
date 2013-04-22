@@ -26,6 +26,9 @@ default['postfix']['main']['mydomain'] = node['domain']
 default['postfix']['main']['myorigin'] = '/etc/mailname'
 
 
+default['postfix']['tables'] = {}
+
+
 # default['postfix']['master'] for master.cf
 default['postfix']['master'] = {}
 default['postfix']['master']['inet:smtp'  ] = { :private => false, :command => 'smtpd' }
