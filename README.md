@@ -1,22 +1,32 @@
 chef-postfix-full
 =================
 
-[![Code Climate](https://codeclimate.com/github/mswart/chef-postfix-full.png)](https://codeclimate.com/github/mswart/chef-postfix-full)
-
-**This cookbook is currently under development and designing! Because the README is written before the feature is implemented, some points could be missing.**
+[![Code Climate](https://codeclimate.com/github/mswart/chef-postfix-full.png)](https://codeclimate.com/github/mswart/chef-postfix-full) [![Build Status](https://travis-ci.org/mswart/chef-postfix-full.png)](https://travis-ci.org/mswart/chef-postfix-full)
 
 
 Description
 -----------
 
-Another postfix cookbook for chef. Against others (e.g. the [opscode/postfix](https://github.com/opscode-cookbooks/postfix)) it tries to abstract all configuration possibilities of postfix to chef with attributes and data bags.
+Another Postfix cookbook for chef. Against others (e.g. the [opscode/postfix](https://github.com/opscode-cookbooks/postfix)) it tries to abstract all configuration possibilities of Postfix to chef with attributes and data bags.
 
-The goal is that the cookbook does not limit your usage of postfix in any ways.
+The goal is that the cookbook does not limit your usage of Postfix in any ways.
 
-Therefore it is not designed for people who want a fast way to a working postfix instance. The default attributes are limited to a minimum, all other configuration is up to you to adjust postfix to your needs.
+Therefore it is not designed for people who want a fast way to a working Postfix instance. The default attributes are limited to a minimum, all other configuration is up to you to adjust Postfix to your needs.
 
 **Info**: Currently multi-instances are not covered. I have some ideas about that but no need.
 Talk to me if you need them.
+
+
+Requirements
+------------
+
+The cookbook requires:
+
+* **ruby 1.8.7+**: Ruby 1.8.7 is currently full supported. But in a few month (also end of life of ruby 1.8), is will be dropped and **ruby 1.9.3** is needed.
+* **chef 10.18+**: The cookbook is design to run under chef 10 and chef 11. Therefore I recommends chef 10.18+ because it is a preparing and migration release. Chef server and chef solo are supported. But some features may not available with chef solo.
+* (**Ubuntu**): The cookbook is tested on Ubuntu 12.04. Other distributions like Debian may work also. I appreciate feedback about status and errors on other distributions or versions.
+
+This cookbook conflicts with the Opscode postfix cookbook because it uses the same attribute name space `node['postfix']`. But I can think of situations where it will work without problems. Talk to me if you have this circumstances and want the conflicts metadata to be removed.
 
 
 Recipes
@@ -24,8 +34,8 @@ Recipes
 
 There are only two recipes:
 
-* `default`: installs postfix and manages `main.cf`, `master.cf` and lookup tables
-* `dovecot`: setup some default values to use dovecot as authentication provider and for mail delivery.
+* `default`: installs Postfix and manages `main.cf`, `master.cf` and lookup tables
+* `dovecot`: setup some default values to use dovecot as authentication provider and for mail delivery. (**planned**)
 
 
 main.cf
@@ -38,8 +48,8 @@ Use option name as key inside this hash. For the value multiple types are suppor
 * `true`, `false`: Use for boolean values, they result in `yes` and `no`.
 * `Integer`: Direct mapping of integers.
 * `String`: The important type use this for all options. The string is pasted into the file without modification. So substitutions like `$base_directory` are possible.
-* `''`: Special case of the String type. Designed to clear a default value for postfix.
-* `nil`: ignore this option and exclude it from `main.cf`. So the postfix default is used.
+* `''`: Special case of the String type. Designed to clear a default value for Postfix.
+* `nil`: ignore this option and exclude it from `main.cf`. So the Postfix default is used.
 
 See [same main.cf example configurations](#basic-changes-and-hash-tables)
 
@@ -91,9 +101,9 @@ The following configuration entries are specified:
 * `_mode` (`00644`): Access mode for the files of the table
 * `_`$key`_from_file`: The value for content entry $key is set to the content of the given file name.
 
-The following options provides shortcuts to use the table for a postfix option. The table is registered with it identifier (type + path to file):
+The following options provides shortcuts to use the table for a Postfix option. The table is registered with it identifier (type + path to file):
 
-* `_set` (`nil`): name or list of names of postfix options to use only this table. The value for this option in `node['postfix']['main']` will **be overwritten**. Two table must not have the same postfix option name (only one option will be used).
+* `_set` (`nil`): name or list of names of Postfix options to use only this table. The value for this option in `node['postfix']['main']` will **be overwritten**. Two table must not have the same Postfix option name (only one option will be used).
 * `_add` (`nil`): Shortcut to add this table to previously defined values (main value or other table). The value for this option in `node['postfix']['main']` will **not be overwritten**.
 
   Use a hash as option. Every key should be a name of a `main.cf` configuration option. The value should be a priority. The lowest value will be the first one in the line. The main.cf value has the priority 0. The string as value is a shortcut for `{ $value => nil }` - append option to previous values.
@@ -127,7 +137,7 @@ The following options provides shortcuts to use the table for a postfix option. 
   alias_maps = regexp:/etc/postfix/tables/fast_table
   virtual_alias_maps = regexp:/etc/postfix/tables/fast_table hash:top_secret ldap:/etc/postfix/tables/low_priority_table
   ```
-* `_proxy` (false): Set this to true to query the table thought the postfix proxy server. See `postmap(8)` for more information.
+* `_proxy` (false): Set this to true to query the table thought the Postfix proxy server. See `postmap(8)` for more information.
 
 The content entry format depends on the table type.
 
@@ -139,14 +149,14 @@ The content entry format depends on the table type.
 Use lookup key as content entry key and result as value. The cookbook call postmap automatically.
 
 
-### Config tables: ldap memcache mysql pgsql sqlite tcp
+### Config tables: ldap, memcache, mysql, pgsql, sqlite, tcp
 
 These tables have all a `main.cf` like configuration file. This file can be created by chef. Set the configuration values like `main.cf` options.
 
-The cookbooks does not ensures that this table type is supported by postfix. On debian based distributions additional packages must be installed.
+The cookbooks does not ensures that this table type is supported by Postfix. On Debian based distributions additional packages must be installed.
 
 
-### Tables with ordering: cidr regexp pcre
+### Tables with ordering: cidr, regexp, pcre
 
 The behavior of the cidr, regexp and pcre table depends on the ordering of the content.
 
@@ -269,6 +279,14 @@ All attributes are written as 1.9+ ruby hashes - minimal overhead.
   },
 }
 ```
+
+
+Contributing
+------------
+
+The cookbook is developed on [github](https://github.com). To report bugs [create an issue](https://github.com/mswart/chef-postfix-full/issues) or open a pull request if you know what needs to be changed.
+
+Feel free to contact me (<chef@malteswart.de> or mswart on freenode) if you have detailed questions about the cookbook. I am interested in your opinion, wishes and use cases.
 
 
 License and Author

@@ -2,6 +2,8 @@
 # Cookbook Name:: postfix-full
 # Recipe:: default
 #
+# Author:: Malte Swart (<chef@malteswart.de>)
+#
 # Copyright 2013, Malte Swart
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
