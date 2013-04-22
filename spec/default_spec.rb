@@ -8,8 +8,18 @@ describe 'postfix-full::default' do
   let(:main_cf) { '/etc/postfix/main.cf' }
   let(:master_cf) { '/etc/postfix/master.cf' }
 
-  it 'should install postfix package' do
-    chef_run.should install_package 'postfix'
+  context 'should install distribution packages' do
+    it 'by default only postfix' do
+      chef_run.should install_package 'postfix'
+    end
+    it 'with ldap table option postfix-ldap packages' do
+      chef_runner.node.set['postfix']['main']['alias_maps'] = 'ldap:test'
+      chef_run.should install_package 'postfix-ldap'
+    end
+    it 'with ldap table postfix-ldap packages' do
+      chef_runner.node.set['postfix']['tables']['test']['_type'] = 'ldap'
+      chef_run.should install_package 'postfix-ldap'
+    end
   end
 
   it 'should configure main.cf' do

@@ -30,6 +30,7 @@ postfix_tables = Postfix::TableFetcher.new(node).fetch
 main_cf = Postfix::MainConfig.new(node['postfix']['main'].to_hash)
 main_cf.register_tables postfix_tables
 
+# write main.cf
 file ::File.join(node['postfix']['base_dir'], 'main.cf') do
   content main_cf.content
   user 'root'
@@ -57,6 +58,14 @@ end
 
 postfix_tables.each do |table|
   table.generate_resources self
+end
+
+used_table_types = main_cf.used_table_types
+used_table_types |= postfix_tables.map { |t| t.params['type'] }.flatten
+used_table_types.uniq.each do |table_type|
+  pkg = node['postfix']['table-packages'][table_type]
+  next unless pkg
+  package pkg
 end
 
 # start service

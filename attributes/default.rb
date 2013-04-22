@@ -28,6 +28,10 @@ default['postfix']['main']['myorigin'] = '/etc/mailname'
 
 default['postfix']['tables'] = {}
 
+%w{cdb ldap mysql prec pgsql}.each do |type|
+  default['postfix']['table-packages'][type] = "postfix-#{type}"
+end
+
 
 # default['postfix']['master'] for master.cf
 default['postfix']['master'] = {}

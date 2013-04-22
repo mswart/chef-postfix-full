@@ -70,6 +70,18 @@ module Postfix
       end
     end
 
+    def used_table_types
+      tables = []
+      @options.each do |option, value|
+        value.to_s.split(' ').each do |v|
+          if v =~ /^(\w+):.+$/
+            tables << $1
+          end
+        end
+      end
+      tables
+    end
+
 
     private
 
