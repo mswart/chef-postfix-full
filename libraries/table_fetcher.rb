@@ -29,7 +29,7 @@ module Postfix
     def fetch
       tables = []
       table_data.each do |name, options|
-        options = resolve_inheritance options
+        options = resolve_inheritance options.to_hash
         # skip abstract tables, they are only for inheritance
         next if options['_abstract']
         # create table object from options, class is chooses from _type option
