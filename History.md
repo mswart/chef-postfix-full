@@ -1,4 +1,10 @@
-0.1.1 / 2013-06-06 
+0.1.2 / 2013-06-13
+==================
+
+  * package: use gzip-compressed archive for publishing
+
+
+0.1.1 / 2013-06-06
 ==================
 
   * lib: fix small chef 11 issue with table options
