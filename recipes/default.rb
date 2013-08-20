@@ -70,6 +70,20 @@ used_table_types.uniq.each do |table_type|
   package pkg
 end
 
+directory '/var/spool/postfix/etc' do
+  owner 'root'
+  group 'root'
+  mode '0755'
+end
+
+file '/var/spool/postfix/etc/resolv.conf' do
+  owner 'root'
+  group 'root'
+  mode '0644'
+  content IO.read('/etc/resolv.conf')
+  notifies :restart, 'service[postfix]'
+end
+
 # start service
 service 'postfix' do
   action :start
