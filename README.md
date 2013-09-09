@@ -166,6 +166,30 @@ The `_format` configuration options defines how the order is created. The follow
 
 Other formats are planed.
 
+Chroot files
+------------
+
+This cookbook can handle files inside postfix chroot. You can use `node['postfix']['chroot_files']` attribute for this purpose. This attribute contains a Hash with the file path as key and the action to perform as value. Currently `cp` is the only supported action, used for copying files.
+
+By default *chroot_files* attribute contains the following value:
+
+```ruby
+{
+  postfix: {
+    chroot_files: {
+      etc/resolv.conf: cp,
+      etc/localtime: cp,
+      etc/services: cp,
+      etc/resolv.conf: cp,
+      etc/hosts: cp,
+      etc/nsswitch.conf: cp,
+      etc/nss_mdns.config: cp,
+    }
+  }
+}
+```
+
+Remember, you can change the chroot directory path setting the [queue_directory](http://www.postfix.org/postconf.5.html#queue_directory) attribute: `node['postfix']['main']['queue_directory']`.
 
 Examples
 --------
