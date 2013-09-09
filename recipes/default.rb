@@ -76,12 +76,26 @@ directory '/var/spool/postfix/etc' do
   mode '0755'
 end
 
-file '/var/spool/postfix/etc/resolv.conf' do
-  owner 'root'
-  group 'root'
-  mode '0644'
-  content IO.read('/etc/resolv.conf')
-  notifies :restart, 'service[postfix]'
+# copy required files to the chroot dir
+postfix_chroot = node['postfix']['main']['queue_directory'] || '/var/spool/postfix'
+node['postfix']['chroot_files'].each do |path, action|
+  case action
+  when 'cp'
+    file_exists = ::File.exists?("/#{path}")
+    file_content = file_exists ? IO.read("/#{path}") : nil # avoid ENOENT error
+    file "#{postfix_chroot}/#{path}" do
+      owner 'root'
+      group 'root'
+      mode '0644'
+      content file_content
+      only_if { file_exists }
+      notifies :restart, 'service[postfix]'
+    end
+  else
+    log "Unsupported chroot file action: #{action}" do
+      level :warn
+    end
+  end
 end
 
 # start service
