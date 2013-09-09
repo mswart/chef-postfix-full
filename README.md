@@ -178,6 +178,12 @@ By default *chroot_files* attribute contains the following value:
   postfix: {
     chroot_files: {
       etc/resolv.conf: cp,
+      etc/localtime: cp,
+      etc/services: cp,
+      etc/resolv.conf: cp,
+      etc/hosts: cp,
+      etc/nsswitch.conf: cp,
+      etc/nss_mdns.config: cp,
     }
   }
 }
