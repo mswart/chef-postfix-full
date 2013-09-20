@@ -73,7 +73,8 @@ module Postfix
         'user' => 'root',
         'group' => 0,
         'mode' => 00644,
-        'file' => ::File.join(node['postfix']['base_dir'], 'tables', name)
+        'file' => ::File.join(node['postfix']['base_dir'], 'tables', name),
+        'cmd' => 'postmap'
       }
     end
 
@@ -121,10 +122,10 @@ module Postfix
     def generate_resources(recipe)
       params = self.params
       content = generate_config_content
-      execute_name = "postmap-#{name}"
+      execute_name = "#{params['cmd']}-#{name}"
 
       recipe.execute execute_name do
-        command "postmap #{params['file']}"
+        command "#{params['cmd']} #{params['file']}"
         user params['user']
         group params['group']
         action :nothing
