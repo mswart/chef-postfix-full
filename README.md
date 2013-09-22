@@ -100,6 +100,7 @@ The following configuration entries are specified:
 * `_group` (`0`): Group name or id for the files of the table
 * `_mode` (`00644`): Access mode for the files of the table
 * `_`$key`_from_file`: The value for content entry $key is set to the content of the given file name.
+* `_cmd` (`postmap`): Command used for generating table (e.g. change to `postalias` for alias database update) -- only used for `hash` type.
 
 The following options provides shortcuts to use the table for a Postfix option. The table is registered with it identifier (type + path to file):
 
@@ -222,6 +223,15 @@ All attributes are written as 1.9+ ruby hashes - minimal overhead.
         _set: 'sender_dependent_relayhost_maps',
         'chef@cookbooks.test' => '[192.0.2.32]',
         '@cookbooks.test' => 'mail37.mails.example',
+      },
+      aliases: {
+        _type: 'hash',
+        _set: 'alias_maps',
+        _add: 'alias_database',
+        _file: '/etc/aliases',
+        _cmd: 'postalias',
+        'postmaster:' => 'root',
+        'root:' => 'sysadmin@example.com'
       }
     }
   }
