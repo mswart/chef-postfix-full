@@ -70,6 +70,37 @@ used_table_types.uniq.each do |table_type|
   package pkg
 end
 
+postfix_chroot = node['postfix']['main']['queue_directory'] || '/var/spool/postfix'
+
+# copy required files to the chroot dir
+node['postfix']['chroot_files'].each do |path, action|
+  case action.to_s
+  when 'cp'
+    directory_path = ::File.dirname(path)
+    directory "#{postfix_chroot}/#{directory_path}" do
+      owner 'root'
+      group 'root'
+      mode '0755'
+      recursive true
+      only_if { directory_path.length > 0 and not ::File.exists?("#{postfix_chroot}/#{directory_path}") }
+    end
+    file_exists = ::File.exists?("/#{path}")
+    file_content = file_exists ? IO.read("/#{path}") : nil # avoid ENOENT error
+    file "#{postfix_chroot}/#{path}" do
+      owner 'root'
+      group 'root'
+      mode '0644'
+      content file_content
+      only_if { file_exists }
+      notifies :restart, 'service[postfix]'
+    end
+  else
+    log "Unsupported chroot file action: #{action}" do
+      level :error
+    end
+  end
+end
+
 # start service
 service 'postfix' do
   action :start
