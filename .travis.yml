@@ -1,11 +1,12 @@
 language: ruby
 rvm:
+  - 2.0.0
   - 1.9.3
   - 1.8.7
 
 gemfile:
-  - spec/support/gemfiles/Gemfile.chef10
-  - spec/support/gemfiles/Gemfile.chef11
+  - spec/fixtures/gemfiles/Gemfile.chef10
+  - spec/fixtures/gemfiles/Gemfile.chef11
 
 before_script:
   - ln -s chef-postfix-full ../postfix-full
