@@ -146,7 +146,7 @@ module Postfix
 
     def generate_config_content()
       unless params['format'] == 'pairs_sorted_by_key'
-        raise "unknown table content format #{params['format']}"
+        raise "unknown table content format \"#{params['format']}\""
       end
       lines = data.sort.map { |option, value| "#{option} #{value}" }
       lines << ''

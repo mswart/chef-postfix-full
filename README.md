@@ -88,11 +88,11 @@ Every table has a name (internal usage and per defined as file name) as key and 
 The hash has two types of entries:
 
 - **configuration entry**: key-value pair to define options of this table for the cookbook. Every key must start with exactly one `_`.
-- **content entry**: Key->value pair to define the content of the table. If the key starts with `_`, the key must be prefixed with additional `_`.
+- **content entry**: Key->value pair to define the content of the table. If the key starts with `_`, the key must be prefixed with an additional `_`.
 
 The following configuration entries are specified:
 
-* `_type`: defines the type of the table, see the following subsection for the list and description of the supported tables. The option is required, but can be inhered from parent tables (see _parent).
+* `_type`: defines the type of the table, see the following subsections for supported tables with their description and special options and meaning. The option is required, but can be inhered from parent tables (see _parent).
 * `_parent` (`nil`): name of table from which options should be inherit (configuration and content entries). There is no nesting limit but also no loop protection.
 * `_abstract` (`nil`): set this to `true` to exclude this resource from chef management. This table can therefore only used as parent table. The `_abstract` option is removed after the inheritance. You have to reset it in the subtable if you what the subtable to be abstract, too.
 * `_file` (`$basedir/tables/$table_name`): File name to put the table content or the table configuration (depends on table type)
@@ -145,25 +145,25 @@ The content entry format depends on the table type.
 [An advances table example with a external service and table inheritancee](#advanced-table-usage)
 
 
-### TableType: hash
+### hash
 
 Use lookup key as content entry key and result as value. The cookbook call postmap automatically.
 
 
-### Config tables: ldap, memcache, mysql, pgsql, sqlite, tcp
+### ldap, memcache, mysql, pgsql, sqlite, tcp (tables with main.cf-like configuration syntax)
 
 These tables have all a `main.cf` like configuration file. This file can be created by chef. Set the configuration values like `main.cf` options.
 
 The cookbooks does not ensures that this table type is supported by Postfix. On Debian based distributions additional packages must be installed.
 
 
-### Tables with ordering: cidr, regexp, pcre
+### cidr, regexp, pcre (tables with ordering-sensitive lines)
 
 The behavior of the cidr, regexp and pcre table depends on the ordering of the content.
 
 The `_format` configuration options defines how the order is created. The following options are supported:
 
-* `pair_sorted_by_key`: The key->value pairs are sorted by key. Key and value are separated by a blank.
+* `pairs_sorted_by_key`: The key->value pairs are sorted by key. Key and value are separated by a blank.
 
 Other formats are planed.
 
