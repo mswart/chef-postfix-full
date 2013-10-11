@@ -145,12 +145,17 @@ module Postfix
     register self, %w(cidr regexp pcre)
 
     def generate_config_content()
-      unless params['format'] == 'pairs_sorted_by_key'
+      if params['format'] == 'pairs_sorted_by_key'
+        lines = data.sort.map { |option, value| "#{option} #{value}" }
+        lines << ''
+        lines.join "\n"
+      elsif params['format'] == 'arrays_with_sortkey'
+        lines = data.sort.map { |sortkey, pair| "#{pair[0]} #{pair[1]}" }
+        lines << ''
+        lines.join "\n"
+      else
         raise "unknown table content format \"#{params['format']}\""
       end
-      lines = data.sort.map { |option, value| "#{option} #{value}" }
-      lines << ''
-      lines.join "\n"
     end
 
     def generate_resources(recipe)
