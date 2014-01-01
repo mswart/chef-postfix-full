@@ -42,7 +42,8 @@ module Postfix
     private
 
     def resolve_inheritance(options)
-      return options.dup unless options['_parent']
+      options = options.dup
+      return options unless options['_parent']
       unless table_data.include? options['_parent']
         msg = "postfix-table: could not find parent table #{options['_parent']}"
         Chef::Log.fatal msg
