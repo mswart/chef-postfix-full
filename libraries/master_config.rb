@@ -28,7 +28,7 @@ module Postfix
     def content
       lines = config_header.split('\n')
       services.sort.each do |name, service|
-        next if service.nil?
+        next unless service
         if /^(inet|unix|fifo|pass):(.+)$/ =~ name
           type = $1
           name = $2

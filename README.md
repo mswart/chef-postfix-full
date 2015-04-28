@@ -59,7 +59,7 @@ master.cf
 
 Every service of `master.cf` has an entry inside the hash `node['postfix']['master']`.
 
-The service type and name is the key - separated by a colon. If service type is unix, the `unix:` prefix may be omitted. The service should be `nil` to be ignored or a hash. The hash supports the following attributes:
+The service type and name is the key - separated by a colon. If service type is unix, the `unix:` prefix may be omitted. The service should be `nil` (works with chef 12 and higher) or `false` to be ignored or a hash. The hash supports the following attributes:
 
 * `command` (`service name`): The program which should be started.
 * `args` (`nil`): Additional arguments for the command call. Could be a string or a list of strings (entries are separated with new lines in `master.cf` but no difference to separation entries with a blank). Use `nil` to pass no additional arguments.
