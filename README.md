@@ -7,9 +7,9 @@ chef-postfix-full
 Description
 -----------
 
-Another Postfix cookbook for chef. Against others (e.g. the [opscode/postfix](https://github.com/opscode-cookbooks/postfix)) it tries to abstract all configuration possibilities of Postfix to chef with attributes and data bags.
+Another Postfix cookbook for chef. Unlike others (e.g. the [opscode/postfix](https://github.com/opscode-cookbooks/postfix)) it tries to abstract all configuration possibilities of Postfix to chef with attributes and data bags.
 
-The goal is that the cookbook does not limit your usage of Postfix in any ways.
+The goal is that the cookbook does not limit your usage of Postfix in any way.
 
 Therefore it is not designed for people who want a fast way to a working Postfix instance. The default attributes are limited to a minimum, all other configuration is up to you to adjust Postfix to your needs.
 
@@ -71,7 +71,7 @@ The service type and name is the key - separated by a colon. If service type is 
 
 Use `nil` or do not set option to use the default value. Use `false` and `true` for `y` and `n`.
 
-See the `master(5)` man page for a complete documentation and [an example definition on other services](#additional-services).
+See the `master(5)` man page for complete documentation and [an example definition on other services](#additional-services).
 
 **Planned**: Definition to define services inside other cookbooks.
 
@@ -102,7 +102,7 @@ The following configuration entries are specified:
 * `_`$key`_from_file`: The value for content entry $key is set to the content of the given file name.
 * `_cmd` (`postmap`): Command used for generating table (e.g. change to `postalias` for alias database update) -- only used for `hash` type.
 
-The following options provides shortcuts to use the table for a Postfix option. The table is registered with it identifier (type + path to file):
+The following options provide shortcuts to use the table for a Postfix option. The table is registered with an identifier (type + path to file):
 
 * `_set` (`nil`): name or list of names of Postfix options to use only this table. The value for this option in `node['postfix']['main']` will **be overwritten**. Two table must not have the same Postfix option name (only one option will be used).
 * `_add` (`nil`): Shortcut to add this table to previously defined values (main value or other table). The value for this option in `node['postfix']['main']` will **not be overwritten**.
@@ -165,7 +165,7 @@ The `_format` configuration options defines how the order is created. The follow
 
 * `pairs_sorted_by_key`: The key->value pairs are sorted by key. Key and value are separated by a blank.
 
-Other formats are planed.
+Other formats are planned.
 
 Chroot files
 ------------
@@ -203,10 +203,10 @@ All attributes are written as 1.9+ ruby hashes - minimal overhead.
 {
   postfix: {
     main: {
-      # the it explicit because it is a important option
+      # this is explicit because it is an important option
       mydomain: 'cookbooks.example',
 
-      # we needs to support bigger attachments:
+      # we need to support bigger attachments:
       message_size_limit: 25600000,
 
       # some sasl configuration for smtp client:
