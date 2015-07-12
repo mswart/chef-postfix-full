@@ -164,6 +164,7 @@ The behavior of the cidr, regexp and pcre table depends on the ordering of the c
 The `_format` configuration options defines how the order is created. The following options are supported:
 
 * `pairs_sorted_by_key`: The key->value pairs are sorted by key. Key and value are separated by a blank.
+* `arrays_with_sortkey`: The key->value pairs are sorted by key. The key remains unused in output and instead `value[0]` and `value[1]` will be separated by a blank in output.
 
 Other formats are planned.
 
